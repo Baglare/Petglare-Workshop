@@ -1,4 +1,17 @@
 {
   "format": "petglare-catalog-v1",
-  "pets": []
+  "pets": [
+    {
+      "id": "test-maskot-2",
+      "name": "Test maskot",
+      "author": "Baglare",
+      "created": "2026-11-23T23:56:28+00:00",
+      "path": "pets/test-maskot-2/pet.png",
+      "bytes": 206257,
+      "width": 512,
+      "height": 508,
+      "sha256": "b0337a5c2184ffe80883cb1919da004d8adc49a78714795e63b966f62ab54e7a",
+      "license": "CC-BY-4.0"
+    }
+  ]
 }
