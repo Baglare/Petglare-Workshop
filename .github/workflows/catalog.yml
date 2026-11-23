@@ -1,0 +1,34 @@
+name: Katalog
+
+# After a merge, index.json is rebuilt from the pets folder. Petglare reads it from
+# raw.githubusercontent.com; nothing else is published.
+on:
+  push:
+    branches: [main]
+    paths: ["pets/**", "scripts/build_index.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog
+  cancel-in-progress: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --disable-pip-version-check pillow==10.4.0
+      - run: python scripts/build_index.py
+      - run: |
+          if git diff --quiet -- index.json; then exit 0; fi
+          git config user.name "petglare-workshop-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.json
+          git commit -m "Kataloğu güncelle"
+          git push

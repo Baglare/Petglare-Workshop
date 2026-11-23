@@ -1,0 +1,43 @@
+name: Pet gönder
+description: Petglare Workshop'a kendi pet'ini gönder. Bir bot görseli denetler ve onay için PR açar.
+title: "Pet: "
+labels: ["pet-gönderimi"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Petglare'da **Ayarlar → Şekil → pet'ine sağ tık → Workshop'a gönder…** bu formu açar ve PNG'yi hazırlar.
+        PNG'yi aşağıdaki **Görsel** alanına sürükle. Kabul edilen: şeffaf arka planlı PNG, en çok 2 MB; katalogda en çok 512 piksele küçültülür.
+  - type: input
+    id: pet-name
+    attributes:
+      label: Pet adı
+      description: En çok 40 karakter.
+      placeholder: Benim petim
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: Görünecek yazar adı
+      description: Boş bırakırsan GitHub kullanıcı adın kullanılır.
+    validations:
+      required: false
+  - type: textarea
+    id: image
+    attributes:
+      label: Görsel
+      description: PNG dosyasını buraya sürükle; GitHub bağlantısını kendisi ekler.
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Onay
+      options:
+        - label: Bu görseli ben yaptım veya paylaşma hakkım var.
+          required: true
+        - label: Görselin Petglare Workshop'ta CC BY 4.0 lisansıyla paylaşılmasını kabul ediyorum.
+          required: true
+        - label: Görsel uygunsuz, şiddet veya nefret içeren bir içerik taşımıyor.
+          required: true

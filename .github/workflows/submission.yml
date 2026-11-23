@@ -1,0 +1,68 @@
+name: Pet gönderimi
+
+# A "Pet gönder" issue becomes a pull request with the checked, re-encoded picture.
+# Nothing from the issue is ever placed into a shell command: the body reaches the script
+# only through an environment variable. The pull request still needs the maintainer's merge.
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    if: contains(github.event.issue.labels.*.name, 'pet-gönderimi') && github.event.issue.state == 'open'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --disable-pip-version-check pillow==10.4.0
+      - id: pet
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+        run: python scripts/submission.py
+      - name: Hata bildir
+        if: steps.pet.outputs.error != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+          MESSAGE: ${{ steps.pet.outputs.error }}
+        run: |
+          printf 'Gönderim kabul edilmedi: %s\n\nFormu düzenleyip kaydedersen tekrar denenir.\n' "$MESSAGE" > comment.md
+          gh issue comment "$NUMBER" --body-file comment.md
+          gh issue edit "$NUMBER" --add-label "geçersiz"
+          exit 1
+      - name: PR aç
+        if: steps.pet.outputs.id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+          PET_ID: ${{ steps.pet.outputs.id }}
+          PET_NAME: ${{ steps.pet.outputs.name }}
+        run: |
+          branch="gonderim/$PET_ID"
+          git config user.name "petglare-workshop-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$branch"
+          git add "pets/$PET_ID"
+          git commit -m "Pet ekle: $PET_NAME (#$NUMBER)"
+          git push --force origin "$branch"
+          printf 'Yeni pet: **%s**\n\nGönderim: #%s. Görsel denetlendi, PNG olarak yeniden kodlandı ve en çok 512 piksele küçültüldü.\nBirleştirilince katalog kendiliğinden güncellenir.\n\nCloses #%s\n' "$PET_NAME" "$NUMBER" "$NUMBER" > body.md
+          if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
+            gh pr create --base main --head "$branch" --title "Pet: $PET_NAME" --body-file body.md
+          fi
+          gh issue comment "$NUMBER" --body "Teşekkürler! Görsel denetlendi ve onay için bir PR açıldı. Birleştirilince Petglare'daki Workshop listesinde görünecek."
+          gh issue edit "$NUMBER" --remove-label "geçersiz" || true
