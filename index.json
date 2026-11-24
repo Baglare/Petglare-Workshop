@@ -1,4 +1,17 @@
 {
   "format": "petglare-catalog-v1",
-  "pets": []
+  "pets": [
+    {
+      "id": "aria-5",
+      "name": "Aria",
+      "author": "Baglare",
+      "created": "2026-11-24T14:01:24+00:00",
+      "path": "pets/aria-5/pet.png",
+      "bytes": 152365,
+      "width": 435,
+      "height": 489,
+      "sha256": "10486f47a137b2419e03e882f8c842f60bdf59b0be243c2ee684b1c996840702",
+      "license": "CC-BY-4.0"
+    }
+  ]
 }
